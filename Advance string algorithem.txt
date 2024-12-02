@@ -1,0 +1,49 @@
+//---------------------- lps(KMP algo) ----------------------------
+vector<int>lps(2*n+1,0);
+	int i=1,len=0;
+	while(i<a.size()){
+		if(a[i]==a[len]) len++,lps[i]=len,i++;
+		else{
+			if(len!=0) len=lps[len-1];
+			else lps[i]=0,i++;
+		}
+	}
+
+------------------------ z- function --------------------
+
+i=1; 
+	int l=0,r=0;
+	vector<int>z(n,0);
+    for(int i = 1; i < n; i++) {
+        if(i < r) {
+            z[i] = min(r - i, z[i - l]);
+        }
+        while(i + z[i] < n && a[z[i]] == a[i + z[i]]) {
+            z[i]++;
+        }
+        if(i + z[i] > r) {
+            l = i;
+            r = i + z[i];
+        }
+    }
+-------------------------------------------------------------
+
+// manachister algo o(n) or substring pallindrome
+https://www.youtube.com/watch?v=ei7qghJEj4Y&ab_channel=VivekGupta
+
+vector<int> manacher_odd(string s) {
+    int n = s.size();
+    s = "$" + s + "^";
+    vector<int> p(n + 2);
+    int l = 1, r = 1;
+    for(int i = 1; i <= n; i++) {
+        p[i] = max(0, min(r - i, p[l + (r - i)]));
+        while(s[i - p[i]] == s[i + p[i]]) {
+            p[i]++;
+        }
+        if(i + p[i] > r) {
+            l = i - p[i], r = i + p[i];
+        }
+    }
+    return vector<int>(begin(p) + 1, end(p) - 1);
+}

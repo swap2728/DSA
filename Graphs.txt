@@ -1,0 +1,692 @@
+-----------------------------------------------------------------------
+1) https://codeforces.com/contest/1529/problem/C
+dp + graph
+2) https://codeforces.com/contest/1294/problem/F
+3) https://codeforces.com/contest/1092/problem/F    (root changing) 
+4) https://codeforces.com/contest/1324/status/F?    (rerooting)
+------------------------------------------------------------------------
+class Solution {
+public:
+    int par[26];
+    
+    int find(int x){
+        if(par[x]==-1) return x;
+        return par[x]=find(par[x]);
+    }
+    
+    void Union(int x, int y) {
+        x = find(x);
+        y = find(y);
+        
+        if (x != y) 
+            par[max(x, y)] = min(x, y); 
+    }
+	
+    string smallestEquivalentString(string s1, string s2, string baseStr) {
+        
+        memset(par, -1, sizeof(par));
+        
+        for (auto i = 0; i < s1.size(); ++i) 
+            Union(s1[i] - 'a', s2[i] - 'a');
+        
+        for(auto i=0;i<baseStr.size();i++) 
+            baseStr[i]=find(baseStr[i]-'a')+'a';
+
+        return baseStr;
+    }
+};
+
+
+
+
+
+
+///////////////////////////   printing cycle with length equal to or grater than k ////
+
+vector<int> adj[N];
+int vis[N], par;
+int n, m, k, u, v;
+ 
+void dfs(int u, int d)
+{
+    vis[u] = d;
+    for (auto v : adj[u])
+    {
+        if (!vis[v])
+        {
+            dfs(v, d + 1);
+            break;
+        }
+        if (vis[u] >= vis[v] + k)
+        {
+            cout << vis[u] - vis[v] + 1 << endl;
+            cout << u << " ";
+            par = v;
+            return;
+        }
+    }
+ 
+    if (par != -1)
+    {
+        cout << u << " ";
+    }
+    if (par == u)
+    {
+        par = -1;
+    }
+}
+
+
+void solve()
+{
+    cin >> n >> m >> k;
+    for (int i = 1; i <= m; i++)
+    {
+        cin >> u >> v;
+        adj[u].pb(v);
+        adj[v].pb(u);
+    }
+    dfs(1, 1);
+}
+
+// ------------------------------- eveler tour for type.2  ,  genereatind flat array ------------------------
+ vector < int > adj[200007];
+ vector< int > flat;
+ map<int , pair<int,int> > mp;
+ int idx=0;
+ void dfs(int crr , int par){
+ 	mp[crr].ff = idx;
+ 	flat.pb(crr);
+ 	idx++;
+ 	for(auto i:adj[crr]){
+ 		if(i!=par){
+ 			dfs(i,crr);
+ 		}
+ 	}
+ 	mp[crr].ss = idx;
+ 	flat.pb(crr);
+ 	idx++;
+ }
+
+
+
+
+
+
+
+// -------------------------------------------- binary lifting , (making dp table, lca, getktnode) -------------------
+
+
+
+ vector < int > adj[200007];
+ vector < int > level(200007);
+ int dp[200007][20];
+ 
+ void dfs(int crr , int par ,int l=0){
+ 	dp[crr][0] = par;
+ 	level[crr] =l;
+ 	for(int i=1;i<20;i++){	
+ 		 dp[crr][i] = dp[dp[crr][i-1]][i-1];
+ 	}
+ 	for(auto i:adj[crr]) {
+ 		if(i!=par) dfs(i,crr,l+1);
+ 	}
+ }
+ 
+ int getkpar(int x, int k){ //binary lifting
+ 	ll par = x;
+    ll cnt = 0;
+    while(k){
+        if(k & 1){
+            par = dp[par][cnt];
+        }
+        k = k >> 1;
+        cnt++;
+    }
+    return par;
+ }
+ 
+ ll lca(int a, int b){
+        if(level[a] < level[b]){
+            swap(a, b);
+        }
+        int k = level[a] - level[b];
+        a = getkpar(a, k);
+        // cout<<a<<endl;
+        if(a == b){
+            return a;
+        }
+        for(ll i = 19; i >= 0; i--){
+            if(dp[a][i] != dp[b][i]){
+                a = dp[a][i];
+                b = dp[b][i];
+            }
+        }
+        // cout<<dp[/a][0]<<endl;
+        return dp[a][0];
+}
+void test(){
+	int n,q;cin>>n>>q;
+	for(int i=0;i<n-1;i++){
+		int a,b;cin>>a>>b;
+		adj[a].pb(b);
+		adj[b].pb(a);
+	}
+	dfs(1,0,0);
+
+	while(q--){
+		int m;cin>>m;
+		int arr[n];
+		int node=0,levelm=-1e9;
+		for(int i=0;i<m;i++){
+			cin>>arr[i];
+			if(levelm < level[arr[i]]){
+				levelm = level[arr[i]];
+				node = arr[i];
+			}
+		}
+		// for(int i=0;i<n;i++){
+			// for(int j=0;j<20;j++){
+				// cout<<dp[i][j]<<" ";
+			// }cout<<endl;
+		// }
+		// cout<<node <<endl;
+		// for(int i=0;i<11;i++)cout<<level[i]<< " ";cout<<endl;
+		int flag = true;
+		for(int i=0;i<m;i++){
+			// cout<<level[lca(arr[i] , node)]<<" "<<level[node]<<endl;
+			int temp = lca(arr[i] , node);
+			// cout<< abs(level[temp] - level[arr[i]]) <<endl;
+			if(abs(level[temp] - level[arr[i]])>1){
+				// cout<<"NO"<<endl ;
+				flag = false;
+				break;
+			}
+		}
+		if(flag)
+		cout<<"YES"<<endl;
+		else cout<<"NO"<<endl;
+	}
+}
+
+signed main(){
+    finout();
+    // int t;
+    // cin>>t;
+    // while(t--){
+        // test();
+    // }
+    test();
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+------------------------------------------------------------ dijkstra -----------------
+1) https://codeforces.com/contest/1846/problem/G
+2) https://cses.fi/problemset/result/6432335/
+3) https://cses.fi/problemset/task/1202
+https://codeforces.com/contest/1602/problem/D
+ int n,m;
+ vector< pair<int,int>>adj[100007];
+ vector<int>parent(100007,-1);
+ vector<int>dist(100007);
+ void dijkstra(int s){
+ 	for(int i=0;i<100007;i++)dist[i]=1e12;
+ 	dist[s]=0;
+ 	priority_queue<pair<int,int>,vector<pair<int,int>>,greater<pair<int,int>>> qt;
+ 	qt.push({0,s});
+ 	while(!qt.empty()){
+ 		pair<int,int> temp = qt.top();
+ 		qt.pop();
+ 		int p = temp.ff;
+ 		int q = temp.ss;	
+ 		if( p != dist[q] ) continue;
+ 		for(auto i:adj[q]){
+ 			if(dist[q] + i.ss < dist[i.ff]){
+ 				dist[i.ff] = dist[q] + i.ss;
+ 				parent[i.ff] = q;
+ 				qt.push({dist[i.ff] , i.ff});
+ 			}
+ 		}
+ 	}
+ }
+ void getpath(int node){
+ 	vector<int>v;
+ 	while(node!=-1){
+ 		// cout<<node<<" ";
+ 		v.pb(node);
+ 		node = parent[node];
+ 	}
+ 	if(v[v.size()-1]!=1){cout<<-1<<endl;return ;}
+ 	for(int i=0;i<v.size();i++)cout<<v[v.size()-1-i]<<" ";cout<<endl;
+ }
+
+map<int,int>mp;
+	for(int i=0;i<m;i++){
+		int a,b,c;cin>>a>>b>>c;
+		adj[a].pb({b,c});
+		adj[b].pb({a,c});
+	}
+	dijkstra(1);
+
+
+
+
+// shortest distance between city i and j
+
+https://cses.fi/problemset/task/1672
+
+const int N = 505;
+int dis[N][N];
+void solve(){
+    int n,m,q; see(n,m,q);
+    int M = 1000000000000;
+    rep(i,1,n+1) rep(j,1,n+1) dis[i][j]=M;
+    rep(i,0,m){
+        int u,v,w; see(u,v,w);
+        dis[u][u]=0, dis[v][v]=0;
+        dis[u][v]=min(dis[u][v],w), dis[v][u]=min(dis[u][v],w);
+    }
+    rep(k,1,n+1){
+        rep(i,1,n+1){
+            rep(j,1,n+1){
+                dis[i][j] = min(dis[i][j],dis[i][k]+dis[k][j]);
+            }
+        }
+    }
+    rep(i,0,q){
+        int a,b; see(a,b);
+        if (dis[a][b]<M)putl(dis[a][b]);
+        else putl(-1);
+    }
+}    
+
+
+
+
+
+
+----------------------------------------------------------- DSU -----------------------
+
+class dsu{
+    vector<int> parent, size, rank;
+ 
+public:
+    dsu(int n){
+        for(int i = 0; i <= n; i++){
+            size.push_back(1);
+            parent.push_back(i);
+            rank.push_back(0);
+        }
+    }
+ 
+    int findpar(int node){
+        if(parent[node] == node){
+            return node;
+        }
+ 
+        return parent[node] = findpar(parent[node]);
+    }
+ 
+    void unionsize(int u, int v){
+        int pu = findpar(u);
+        int pv = findpar(v);
+ 
+        if(pu == pv){
+            return;
+        }
+ 
+        if(size[pu] < size[pv]){
+            parent[pu] = pv;
+            size[pv] += size[pu];
+        }else{
+            parent[pv] = pu;
+            size[pu] += size[pv];
+        }
+    }
+ 
+    void unionrank(int u, int v){
+        int pu = findpar(u);
+        int pv = findpar(v);
+ 
+        if(pu == pv){
+            return;
+        }
+        if(rank[pu] == rank[pv]){
+            parent[pu] = pv;
+            rank[pu]++;
+        }else if(rank[pu] < rank[pv]){
+            parent[pu] = pv;
+        }else{
+            parent[pv] = pu;
+        }
+    }
+};
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------
+   //  -----------------------------------------strongly connected conponant-------------------------------
+
+//---------------- dectar------------------------------------
+ vector<int>adj[100007];  // adj
+ vector<int>tadj[100007]; // tadj
+ stack<int>st;            // stack
+ vector<int>temp;         // tamp       
+ vector<int>vis(100007);  // vis
+ vector<vector<int>>scc;  //scc
+ //---------------dfs---------------------------------------------------
+ void dfs(int ind){
+ 	vis[ind]=1;
+ 	for(auto i:adj[ind])if(!vis[i])dfs(i);  //filling stack
+ 	st.push(ind);
+ }
+ 
+ void dfs1(int ind){
+ 	vis[ind]=1;
+ 	temp.pb(arr[ind]);
+ 	for(auto i:tadj[ind])if(!vis[i])dfs1(i); // makind scc
+ }
+ 
+//---------------- main--------------------------------------------------- 
+void test(){
+	int n;cin>>n;// nodes
+	int m;cin>>m;// edges
+	
+	f(i,0,m){
+		int a,b;cin>>a>>b;
+		adj[a].pb(b);  // adj graph
+		tadj[b].pb(a); // transvese graph
+	}
+	
+	f(i,1,n+1) {  if(!vis[i])dfs(i);  } // fillind stack 
+	
+	f(i,0,100007)vis[i]=0;
+	while(!st.empty())
+	{ // fillind ssc
+		int p=st.top();st.pop();
+		if(!vis[p])
+		    dfs1(p),scc.pb(temp),temp.clear();
+	}
+	
+}
+
+
+
+
+
+
+
+
+
+//------------------------------- dp on tree----------------------------
+
+https://codeforces.com/contest/1851/problem/E
+
+int n,k;
+ vector<int> adj[200007];
+ vector<int> arr(200007);
+
+ 
+ int dfs(int node,vector<int>&dp){
+ 	if(dp[node]!=-1)return dp[node];
+ 	if(adj[node].size()==0)return dp[node]=arr[node];
+ 	int ans=0;
+ 	for(auto it:adj[node]){
+ 		// if(it==node)return dp[it]=arr[node];
+ 		ans+=dfs(it,dp);
+ 	}
+ 	return dp[node]=min(ans,arr[node]);
+ 	
+ }
+ 
+void test(){
+	cin>>n>>k;
+	vector<int>dp(n+3,-1);
+	adj[0].clear();
+	// f(i,0,n+1)arr[i]
+	arr.clear();
+	arr[0]=0;
+	// for(int i=0;i<100007;i++)adj[i].clear();
+	for(int i=1;i<n+1;i++){
+		cin>>arr[i];
+		adj[i].clear();
+	}
+	for(int i=0;i<k;i++){
+		int a;cin>>a;
+		dp[a]=0;
+	}
+	for(int i=0;i<n;i++){
+		int a;cin>>a;
+		for(int j=0;j<a;j++){
+			int b;cin>>b;
+			adj[i+1].pb(b);
+		}
+	}
+	for(int i=1;i<=n;i++){
+		cout<<dfs(i,dp)<<" ";		
+	}cout<<endl;
+}
+
+
+// getting min val for each node commig from 
+
+
+
+
+
+
+
+-------------------------  bridge detaction ---------------------------------------------------------------------
+1)
+https://leetcode.com/problems/critical-connections-in-a-network/description/
+2) https://codeforces.com/contest/118/problem/E
+
+ vector<int> adj[200007];
+ vector<int> tin(200007);
+ vector<int> low(200007);
+ vector<int> vis(200007);
+ vector<pair<int,int>> bridge;
+ vector<pair<int,int>> edgelist;
+ int check=0;
+ int n,m;
+ void dfs(int node,int par,int time){
+ 	vis[node]=1;
+ 	tin[node]=low[node]=time;
+ 	time++;
+ 	for(auto i:adj[node]){
+ 		if(i==par)continue;
+ 		if(vis[i]==0){
+ 			dfs(i,node,time);
+ 			low[node]=min(low[node],low[i]);
+ 			if(low[i]>tin[node]){check=1;bridge.pb({i,node});}  // bridge edge
+ 			else edgelist.pb({node,i});              //edge to form loop
+ 		}
+ 		else {
+ 			low[node]=min(low[node],low[i]);
+ 			if(tin[node]>tin[i])edgelist.pb({node,i}); 
+ 		}
+ 	}
+ }
+void test(){
+	cin>>n>>m;
+	f(i,0,m){
+		int a,b;cin>>a>>b;
+		adj[a].pb(b);
+		adj[b].pb(a);
+	}
+	dfs(1,0,1);
+	if(check)cout<<0<<endl;
+	else{
+		// fo
+		for(auto i:edgelist)cout<<i.ff<<" "<<i.ss<<endl;  // path of scc
+	}
+}
+
+// detect the bridge edges
+// detect path of strongly conntected component
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+delimiter && 
+
+ 
+
+
+------------------------------------------------------
+
+2d dp in tree intersting 
+https://leetcode.com/contest/weekly-contest-369/problems/maximum-points-after-collecting-coins-from-all-nodes/
+class Solution {
+public:
+    int maximumPoints(vector<vector<int>>& edges, vector<int>& coins, int k) {
+        int n=coins.size();
+        vector<vector<int>> g(n);
+        for(auto edge : edges)
+        {
+            int u=edge[0];
+            int v=edge[1];
+            g[u].push_back(v);
+            g[v].push_back(u);
+        }
+        
+        int dp[n][21];
+        memset(dp,-1,sizeof(dp));
+        
+        function< int(int,int,int) >dfs=[&](int node,int parent,int reduce){
+            if(dp[node][reduce]!=-1)
+                return dp[node][reduce];
+            if(reduce>=20)
+            {
+                return dp[node][reduce]=0;
+            }
+            
+            int currCoins=coins[node];
+            for(int j=0;j<reduce;j++)
+                currCoins/=2;
+            
+            int way1=currCoins-k;
+            int way2=currCoins/2;
+            
+            for(auto child : g[node])
+            {
+                if(child!=parent)
+                {
+                    dfs(child,node,reduce+1);
+                    dfs(child,node,reduce);
+                    way1=way1+dp[child][reduce];
+                    way2=way2+dp[child][reduce+1];
+                }
+            }
+            
+            return dp[node][reduce]=std::max(way1,way2);
+        };
+        dfs(0,-1,0);
+        
+        return dp[0][0];
+    }
+};
+
+
+
+-------------------------------------------------------------------
+-------------------------Articulation Point in Graph: G-56
+
+
+
+
+#include <bits/stdc++.h>
+using namespace std;
+
+//User function Template for C++
+
+class Solution {
+private:
+    int timer = 1;
+    void dfs(int node, int parent, vector<int> &vis, int tin[], int low[],
+             vector<int> &mark, vector<int>adj[]) {
+        vis[node] = 1;
+        tin[node] = low[node] = timer;
+        timer++;
+        int child = 0;
+        for (auto it : adj[node]) {
+            if (it == parent) continue;
+            if (!vis[it]) {
+                dfs(it, node, vis, tin, low, mark, adj);
+                low[node] = min(low[node], low[it]);
+                if (low[it] >= tin[node] && parent != -1) {
+                    mark[node] = 1;
+                }
+                child++;
+            }
+            else {
+                low[node] = min(low[node], tin[it]);
+            }
+        }
+        if (child > 1 && parent == -1) {
+            mark[node] = 1;
+        }
+    }
+public:
+    vector<int> articulationPoints(int n, vector<int>adj[]) {
+        vector<int> vis(n, 0);
+        int tin[n];
+        int low[n];
+        vector<int> mark(n, 0);
+        for (int i = 0; i < n; i++) {
+            if (!vis[i]) {
+                dfs(i, -1, vis, tin, low, mark, adj);
+            }
+        }
+        vector<int> ans;
+        for (int i = 0; i < n; i++) {
+            if (mark[i] == 1) {
+                ans.push_back(i);
+            }
+        }
+        if (ans.size() == 0) return { -1};
+        return ans;
+    }
+};
+int main() {
+
+    int n = 5;
+    vector<vector<int>> edges = {
+        {0, 1}, {1, 4},
+        {2, 4}, {2, 3}, {3, 4}
+    };
+
+    vector<int> adj[n];
+    for (auto it : edges) {
+        int u = it[0], v = it[1];
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    Solution obj;
+    vector<int> nodes = obj.articulationPoints(n, adj);
+    for (auto node : nodes) {
+        cout << node << " ";
+    }
+    cout << endl;
+    return 0;
+}

@@ -1,0 +1,287 @@
+https://codeforces.com/problemset/problem/685/B
+https://codeforces.com/problemset/problem/685/B
+https://codeforces.com/contest/1324/problem/F
+https://codeforces.com/problemset/problem/1092/F
+https://codeforces.com/problemset/problem/1746/D
+https://www.youtube.com/watch?v=cABfvs4CsrA //quetion remationg to do
+https://codeforces.com/contest/274/status/B?friends=on      // to do
+----------------------------------------------------------------
+
+//---------------------------------------- distance (max) two node 
+
+vector<int>v[(int)1e6];
+int n,m,ans;
+int cnt[(int)1e5];
+
+void dfs(int crr,int par){
+    cnt[crr]=1;
+    for(auto i:v[crr]){
+        if(i!=par){
+            int t=i;
+            dfs(t,crr);
+            ans=max(ans,cnt[crr]+cnt[t]);
+            cnt[crr]=max(cnt[crr],cnt[t]+1);
+        }
+    }
+}
+
+void test(){
+    cin>>n>>m;
+    f(i,0,m){
+        int a,b;cin>>a>>b;
+        v[a].pb(b);
+        v[b].pb(a);
+    }
+    ans=1;
+    dfs(1,0);
+    cout<<ans-1<<endl;
+}
+
+//- ------------------- (binary lifting ) ,  (level of each node) ,( kth parant ),( lca of 2 node)----------
+
+ 
+ vector < int > adj[200007];
+ vector < int > level(200007);
+ int dp[200007][20];
+ 
+ void dfs(int crr , int par ,int l=0){
+ 	dp[crr][0] = par;
+ 	level[crr] =l;
+ 	for(int i=1;i<20;i++){
+ 		 dp[crr][i] = dp[dp[crr][i-1]][i-1];
+ 	}
+ 	for(auto i:adj[crr]) {
+ 		if(i!=par) dfs(i,crr,l+1);
+ 	}
+ }
+ 
+ int getkpar(int x, int k){ //binary lifting
+ 	ll par = x;
+    ll cnt = 0;
+    while(k){
+        if(k & 1){
+            par = dp[par][cnt];
+        }
+        k = k >> 1;
+        cnt++;
+    }
+    return par;
+ }
+ 
+ ll lca(int a, int b){
+        if(level[a] < level[b]){
+            swap(a, b);
+        }
+        int k = level[a] - level[b];
+        a = getkpar(a, k);
+        // cout<<a<<endl;
+        if(a == b){
+            return a;
+        }
+        for(ll i = 19; i >= 0; i--){
+            if(dp[a][i] != dp[b][i]){
+                a = dp[a][i];
+                b = dp[b][i];
+            }
+        }
+        // cout<<dp[/a][0]<<endl;
+        return dp[a][0];
+}
+
+//  int temp = lca(a,b);  // lca of a and b 
+//  int temp = level[a];  // level of a node
+//  int temp = getkpar(a,b); // bth parant of a
+// --------------------------------------------------------
+
+
+
+dp on tree (_node changeing):=>
+1)video:=>
+https://www.youtube.com/watch?v=SOhZqL6HPjQ&list=PLb3g_Z8nEv1j_BC-fmZWHFe6jmU_zv-8s&index=6
+2) quetion :=>
+https://usaco.guide/gold/dp-trees?lang=cpp
+-https://codeforces.com/contest/161/problem/D
+-https://cses.fi/problemset/task/1133/
+
+
+
+
+
+---------------------------------  finding block(subtree) from tree ----------------------------------------------
+ /// as the block is find return 0 or return ans;
+ex1 : finding xor 0 of tree 
+--> as xor if 0 of sub tree return 0 or return curr here; 
+
+int n, k, xo = 0, cnt = 0;
+vector<int> v(N);
+vector<int> adj[N];
+vector<int> subtreeXor(N);
+ 
+int dfs(int node, int par) {
+    int curr = v[node];
+    for (auto it : adj[node]) {
+        if (it != par) {
+            int t = dfs(it, node);
+            curr ^= t;
+        }
+    }
+    subtreeXor[node] = curr;
+    if (subtreeXor[node] == xo) {
+        cnt++;
+        return 0;
+    }
+    return curr;
+}
+
+e2 : finding subtree of even size  or can say ren=moving max nodes so the tree has even nodes 
+
+vector<int> adj[100007];
+vector<int>dp(100007);
+ int n,cnt;
+ int dfs(int node,int par){
+ 	int sum=1;
+ 	for(auto child:adj[node]){
+ 		if(child!=par){
+ 			sum+=dfs(child,node);
+ 		}
+ 	}
+ 	dp[node]=sum;
+ 	if(dp[node]%2==0){
+ 		cnt++;
+ 		return 0;
+ 	}
+ 	return sum;	
+ }
+
+--------------------------------------------------------------------------------------------------------
+
+elear tour 1:
+
+
+ int ind=0;
+ vector<int>flat;
+ map<int,int>mp;
+ void evelar1(int node ,int par){
+ 	
+ 	if(mp.find(node) == mp.end()){
+ 		mp[node]=ind;
+ 	}
+ 	ind++;
+ 	flat.pb(node);
+ 	
+ 	for(auto child:adj[node]){
+ 		if(child==par)continue;
+ 		dfs(child,node);
+ 		flat.pb(node);
+ 		ind++;
+ 	}
+ } 
+ 
+we can have level here so that we can get which node is lowest in range
+
+tree:
+6
+1 2
+1 3
+1 4
+3 5 
+3 6
+
+{ 1,2,1,3,5,3,,6,3,1,4,1}
+mp -> {1,0},{2,1},{3,3},{4,9},{5,4},{6,6}
+
+------------------------------------------------------------
+
+
+eveler tour2
+int ind=0;
+	 vector<int>flat;
+	 map<int,pair<int,int>>mp;
+	 
+	 void evelar2(int node ,int par){
+	 	mp[node].first=ind;
+	 	flat.pb(node);
+	 	ind++;
+	 	for(auto child:adj[node]){
+	 		if(child==par)continue;
+	 		dfs(child,node);
+	 	}
+	 	mp[node].second=ind;
+	 	flat.pb(node);
+	 	ind++;
+	 }
+
+
+
+flat -> 1,2,2,3,5,5,6,6,3,4,4,1
+
+-------------------------------------------------------------------
+
+
+    vector<int> bellman_ford(int V, vector<vector<int>>& edges, int S) {
+        // Code here
+        // create distance array where we store the possible shortest distance
+        vector<int> dist(V, 1e8);
+        // set distance of the source to 0
+        dist[S] = 0;
+        
+        // now iterate (V-1) times and apply relexation --> Bellman-Ford algorithm
+        for(int i=0; i<V-1; i++) {
+            for(auto it: edges) {
+                int u = it[0];
+                int v = it[1];
+                int wt = it[2];
+                
+                if(dist[u] != 1e8 and dist[u]+wt < dist[v]) {
+                    dist[v] = dist[u] + wt;
+                }
+            }
+        }
+        
+        // idealy this is the end and we can return the dist[] as answer
+        // but there is a possibilty of negative cycle 
+        for(auto it: edges) {
+            int u = it[0];
+            int v = it[1];
+            int wt = it[2];
+            
+            if(dist[u] != 1e8 and dist[u]+wt < dist[v]) {
+                return {-1};
+            }
+        }
+        
+        return dist;
+    }
+-----------===========++++++++++++++++++--------------[--
+
+
+dp on tree or rerooting
+
+int dfs(int node,int par){
+        // int q=1;
+        cntofnode[node]=1;
+        for(auto it:adj[node]){
+            if(it!=par){
+                int p=dfs(it,node);
+                dp[node]+=p+dp[it];
+                cntofnode[node]+=p;
+            }
+        }
+        return cntofnode[node];
+    }
+    void dfs2(int node,int par,vector<int>&ans){
+        ans[node]=dp[node];
+        // cout
+        for(auto it:adj[node]){
+            if(it!=par){
+                int p=dp[it];
+                dp[it]+=(dp[node]-cntofnode[it]-dp[it])+cntofnode[node]-cntofnode[it];
+                int y=cntofnode[it];
+                cntofnode[it]=cntofnode[node];
+                dfs2(it,node,ans);
+                dp[it]=p;
+                cntofnode[it]=y;
+            }
+        }
+    }
+

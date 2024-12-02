@@ -1,0 +1,132 @@
+question:
+1) https://codeforces.com/contest/706/problem/D
+2) https://codeforces.com/problemset/problem/282/E
+---------------------------------- trie for storing string and string cout --------------------------------------------
+struct Node{
+        Node* arr[26];
+        int cnt=0,scnt=0;
+    };
+    class trie{
+        public:
+        Node* root;
+
+        trie(){root=new Node();}
+
+        void insert(string s){
+            Node *node=root;
+            for(int i=0;i<s.size();i++){
+                if(node->arr[s[i]-'a']==NULL) node->arr[s[i]-'a']=new Node();
+                node = node->arr[s[i]-'a'] ;
+                node->scnt++;
+            }
+            node->cnt=1;
+        }
+        void findstring(string s){
+            Node *node=root;
+            for(int i=0;i<s.size();i++){
+                if(node->arr[s[i]-'a']==NULL) return false;
+                node = node->arr[s[i]-'a'] ;
+            }
+            return true;
+        }
+        void delete(string s){
+            Node* node = root;
+            for(int i=0;i<s.size();i++){
+                node = node->arr[s[i]-'a'] ;
+                node->scnt--;
+            }
+            return node->cnt--;
+        }
+        int result(string s){
+            Node* node = root;
+            int ans=0;
+            for(int i=0;i<s.size();i++){
+                if(node->arr[s[i]-'a']==NULL)return 0;
+                node=node->arr[s[i]-'a'];
+                ans+=node->scnt;
+            }
+            return ans;
+        }
+    };
+
+
+---------------------------------- maximum xor in arr segment using trie-------------------
+struct TrieNode {
+    int value;
+    TrieNode *child[2];
+    TrieNode() {
+        this->value = 0;
+        this->child[0] = this->child[1] = NULL;
+    }
+};
+ 
+class Solution {
+public:
+    void insert(TrieNode *root, int pre_xor) {
+        TrieNode *temp = root;
+        for (int i = 31; i >= 0; i--) {
+            bool curr  = pre_xor & (1 << i);
+            if (temp->child[curr] == NULL) {
+                temp->child[curr] = new TrieNode();
+            }
+            temp = temp->child[curr];
+        }
+        temp->value = pre_xor;
+    }
+    int query(TrieNode *root, int pre_xor) {
+        TrieNode *temp = root;
+        for (int i = 31; i >= 0; i--) {
+            bool curr = pre_xor & (1 << i);
+            if (temp->child[1 - curr] != NULL) {
+                temp = temp->child[1 - curr];
+            } else if (temp->child[curr] != NULL) {
+                temp = temp->child[curr];
+ 
+            }
+        }
+        return pre_xor ^ (temp->value);
+    }
+    int maxSubarrayXOR(int N, int arr[]) {
+        TrieNode *root = new TrieNode();
+        insert(root, 0);
+        int result = INT_MIN, pre_xor = 0;
+        for (int i = 0; i < N; i++) {
+            pre_xor = pre_xor ^ arr[i];
+            insert(root, pre_xor);
+            result = max(result, query(root, pre_xor));
+        }
+        return result;
+    }
+};
+
+//  ->
+// ->  ob.maxSubarrayXOR(N, arr)
+
+-------------------------------------------------------------------------
+
+
+  long long numberOfSubarrays(vector<int>& a) {
+        vector <pair <int, int>> st;
+        long long ans = 0;
+        for (auto &x: a){
+        	while (not st.empty() and st.back().first < x){
+        		st.pop_back();
+        	}
+        	if (st.empty() or st.back().first != x){
+        		st.emplace_back(x, 1);
+        	}
+        	else{
+        		st.back().second++;
+        	}
+        	ans += st.back().second;
+        }
+        return ans;
+    }
+
+next greatest element
+
+---------------------------------
+
+count subarrays such that xors is less than x
+
+https://practice.geeksforgeeks.org/contest/gfg-weekly-183-rated-contest/problems

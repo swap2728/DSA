@@ -1,0 +1,303 @@
+HP solves leetcode contest problem in (26 min) ------------------------ 
+----------------
+1)  https://leetcode.com/problems/count-ways-to-build-good-strings/submissions/949755513/
+// adding valu in range 
+2) https://leetcode.com/contest/biweekly-contest-105/problems/extra-characters-in-a-string/
+3) 	  (alice and bob question)
+3) https://leetcode.com/problems/predict-the-winner/description/  // (alice and bob question)
+
+--------------------------------------------------------------------------------------
+class Solution {
+public:
+    bool helper(int start, int end,int a, int b, int flag, vector<int>& nums){
+        if(start>end)return a>=b;
+        bool sum;
+        if(flag==1){
+            sum = helper(start+1,end,a+nums[start],b,2,nums)||helper(start,end-1,a+nums[end],b,2,nums);
+        }
+        else{
+            sum = helper(start+1,end,a,b+nums[start],1,nums)&&helper(start,end-1,a,b+nums[end],1,nums);
+        }
+        return sum;
+    }
+    bool PredictTheWinner(vector<int>& nums) {
+        return helper(0,nums.size()-1,0,0,1,nums);
+    }
+};
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+4) https://www.codechef.com/problems/ARRAY_BREAK?tab=submissions (codechef ) 
+----------------------------------------------------------------
+https://atcoder.jp/contests/dp/tasks/dp_m     
+
+
+const int MAX_N = 100;
+const int MAX_SUM = 1e5;
+int n;
+
+int fun(vector<int> &coins, int i, int amount, vector<vector<int>> &dp)
+{
+    if (i >= coins.size() || amount <= 0)
+    {
+        return (amount == 0) ? 0 : INT_MAX - 1;
+    }
+    if (dp[i][amount] != -1)
+    {
+        return dp[i][amount];
+    }
+
+    int res = -1;
+    if (coins[i] > amount)
+    {
+        int doNotTakeCoin = 0 + fun(coins, i + 1, amount - 0, dp);
+        res = doNotTakeCoin;
+    }
+    else
+    {
+        int takeCoin = 1 + fun(coins, i + 1, amount - coins[i], dp);
+        int doNotTakeCoin = 0 + fun(coins, i + 1, amount - 0, dp);
+        res = min(takeCoin, doNotTakeCoin);
+    }
+
+    return dp[i][amount] = res;
+}
+
+void solve()
+{
+    cin >> n;
+    int sum = 0;
+    vector<int> A(n);
+    for (int i = 0; i < n; i++)
+    {
+        cin >> A[i];
+        sum += A[i];
+    }
+
+    vector<vector<int>> dp(n + 1, vector<int>(sum + 1, -1));
+    set<int> ans;
+    sort(all(A));
+
+    for (int i = A[0]; i <= sum; i++)
+    {
+        int fans = fun(A, 0, i, dp);
+        if (fans != 2147483646)
+        {
+            ans.insert(i);
+        }
+    }
+
+    cout << (int)(ans.size()) << endl;
+    for (int sum : ans)
+    {
+        cout << sum << " ";
+    }
+    cout << endl;
+}
+
+
+///////////////////////////////////
+
+https://codeforces.com/contest/166/problem/E
+ 
+void solve()
+{
+    int dp[2][4];
+    memset(dp, 0, sizeof(dp));
+    dp[0][0] = 1;
+    int n;
+    cin >> n;
+    int curr = 0, nxt = 1;
+    for (int i = 0; i < n; i++)
+    {
+        for (int k = 0; k < 4; k++)
+        {
+            dp[nxt][k] = 0;
+            for (int j = 0; j < 4; j++)
+            {
+                if (j != k)
+                    dp[nxt][k] += dp[curr][j];
+            }
+            dp[nxt][k] %= M;
+        }
+        nxt ^= 1;
+        curr ^= 1;
+    }
+    cout << dp[curr][0] << endl;
+}
+
+
+
+///////////////////////////   bitmasking
+
+https://codeforces.com/contest/580/status/D/page/4?order=BY_PROGRAM_LENGTH_ASC
+
+#include<bits/stdc++.h>
+using namespace std;
+#define int long long
+int n,m,k,tot[19];
+int a[19],f[1000005][19],ans,p[19][19];
+int dfs(int s,int tot,int frt){
+	if(f[s][frt]!=-1)return f[s][frt];
+	if(tot>=m)return f[s][frt]=0;
+	int res=0;	
+	for(int i=1;i<=n;++i){
+		if(!((s>>(i-1))&1)){
+			f[s][frt]=max(f[s][frt],dfs(s|(1<<(i-1)),tot+1,i)+a[i]+p[frt][i]);
+		}
+	}
+	return f[s][frt];
+}
+signed main(){
+//	freopen("2.in","r",stdin);
+//	freopen("2.out","w",stdout);
+	cin>>n>>m>>k;
+	memset(f,-1,sizeof(f));
+	for(int i=1;i<=n;++i)cin>>a[i];
+	for(int i=1;i<=k;++i){
+		int x,y,c;
+		cin>>x>>y>>c;
+		p[x][y]=c; 
+	}
+	int ans=dfs(0,0,0);
+	cout<<ans;
+	return 0;
+} 
+
+//////////////////////////////////////////////
+1)  https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/submissions/977021562/
+---------------------------------  best example of state mang.of dp ---------------
+public:
+	int maxProfit(std::vector<int>& prices, int fee)
+	{
+		auto buy_state = -1 * prices[0];
+		auto sell_state = 0;
+		for (auto i = 1; i != static_cast<int>(std::size(prices)); ++i)
+		{
+			buy_state = std::max(buy_state, sell_state - prices[i]);
+			sell_state = std::max(sell_state, prices[i] + buy_state - fee);
+		}
+		return sell_state;
+	}
+};
+
+/////----------------------------dp using map ------------------
+bool solver(int i,int p,int q,string a,string b,map<tuple<int,int,int>,bool>&dp){
+ 	if(a[i]!=b[p]&&a[i]!=b[q])return dp[{i,p,q}]=false;
+ 	if(i==0){
+ 		if(p==q)return dp[{i,p,q}]=true;
+ 		else return dp[{i,p,q}]=false;
+ 	}
+ 	if(dp.find({i,p,q})!=dp.end())return dp[{i,p,q}];
+ 	// cout<<a[i]<<" "<<b[p]<<" "<<b[q]<<endl;
+ 	bool n,m=n=false;
+ 	if(a[i]==b[p])n|=solver(i-1,p+1,q,a,b,dp);
+ 	if(a[i]==b[q])m|=solver(i-1,p,q-1,a,b,dp);
+ 	return dp[{i,p,q}]=n|m;
+ }
+ 
+void test(){
+	int n;cin>>n;
+	string a,b;cin>>a>>b;
+	// bool
+	// dp.clear();
+	 map<tuple<int,int,int>,bool>dp;
+	bool p=solver(n-1,0,n-1,a,b,dp);
+	if(p)
+	cout<<"YES"<<endl;
+	else 
+	cout<<"NO"<<endl;
+}
+
+-------------- reducing state ------------------
+1) https://leetcode.com/problems/tallest-billboard/submissions/978531074/
+
+class Solution {
+public:
+    int n;
+    // int ans=0;
+    int solver(int ind ,int ans1,int ans2,vector<int>& rods,vector<unordered_map<int,int>>&dp){
+        if(ind==n){
+            if(ans1)return INT_MIN;
+            else return 0;
+        }
+        if(dp[ind].count(ans1))return dp[ind][ans1];
+        // if(dp.find({ind,ans1,ans2})!=dp.end())return dp[{ind,ans1,ans2}];
+        int take1=solver(ind+1 , ans1 , ans2 ,rods , dp);
+        take1=max(take1,rods[ind]+solver(ind+1 , ans1 - rods[ind],ans2 ,rods ,dp));
+        take1=max(take1,solver(ind+1 , ans1 + rods[ind] , ans2, rods ,dp));
+        return dp[ind][ans1]=take1;
+    }
+    int tallestBillboard(vector<int>& rods) {
+        n=rods.size();
+        vector<unordered_map<int,int>>dp(n+1);
+        // unorder
+        //  unordered_map<tuple<int,int,int>,int>dp;
+        return solver(0,0,0,rods,dp);
+
+    }
+};
+
+
+-------------------------- digit dp -----------------------------
+https://www.youtube.com/watch?v=sCwokuCoQB8             -->video link //
+1) https://leetcode.com/contest/weekly-contest-356/ranking/6/
+2) https://cses.fi/problemset/submit/2220/
+class Solution {
+    long long dp[101][10][2][2];
+    const int mod=1e9+7;
+    long long solve(int index,int prev,int start,int small,string &s)
+    {
+        if(index==s.size())
+            return 1ll;
+        
+        long long &val=dp[index][prev][start][small];
+        if(val!=-1)
+            return val;
+        
+        val=0ll;
+        if(start==1)
+            val=solve(index+1,prev,0,1,s);
+        
+        for(int i=start;i<10;i++)
+        {
+            int la=prev;	
+            if(start==1)
+                la=i-1;
+            
+            if(abs(i-la)!=1)
+                continue;
+            if(small || i<s[index]-'0')
+                val=(val+solve(index+1,i,0,1,s))%mod;
+            else if(i==s[index]-'0')
+                 val=(val+solve(index+1,i,0,0,s))%mod;
+        }
+        return val;
+    }
+public:
+    int countSteppingNumbers(string low, string high) {
+        memset(dp,-1,sizeof(dp));
+        long long ans1=solve(0,0,1,0,high);
+        
+        memset(dp,-1,sizeof(dp));
+        long long ans2=solve(0,0,1,0,low);
+        long long ans=(ans1-ans2+mod)%mod;
+        
+        long long add=1ll;
+        for(int i=1;i<low.size();i++)
+        {
+            if(abs(low[i]-low[i-1])!=1)
+                add=0ll;
+        }
+        ans=(ans+add)%mod;
+        
+        return ans;
+    }
+};
+
+1)  https://leetcode.com/problems/non-negative-integers-without-consecutive-ones/solutions/2208229/easy-to-understand-digit-dp-recursion-memoization/
+
+-------------------------- dp for subarray ----------------------------
+1) https://leetcode.com/problems/bitwise-ors-of-subarrays/description/
+
+
+
